@@ -7,10 +7,13 @@ import {
   Param,
   Delete,
   Inject,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
-import { CreateOrderDto } from './dto';
+import { CreateOrderDto, OrderPaginationDto } from './dto';
 import { ORDER_SERVICE } from 'src/config';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { catchError } from 'rxjs';
 
 @Controller('orders')
 export class OrdersController {
@@ -24,12 +27,19 @@ export class OrdersController {
   }
 
   @Get()
-  findAll() {
-    return this.ordersClient.send({ cmd: 'find_all_orders' }, {});
+  findAll(@Query() orderPaginationDto: OrderPaginationDto) {
+    return this.ordersClient.send(
+      { cmd: 'find_all_orders' },
+      orderPaginationDto,
+    );
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ordersClient.send({ cmd: 'find_one_order' }, { id });
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.ordersClient.send({ cmd: 'find_one_order' }, { id }).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
   }
 }
