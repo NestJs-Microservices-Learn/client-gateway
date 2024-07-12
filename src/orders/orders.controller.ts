@@ -14,6 +14,8 @@ import { CreateOrderDto, OrderPaginationDto } from './dto';
 import { ORDER_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
+import { OrderStatus } from './enum/order.enum';
+import { ChangeOrderDto } from './dto/change-status.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -28,10 +30,13 @@ export class OrdersController {
 
   @Get()
   findAll(@Query() orderPaginationDto: OrderPaginationDto) {
-    return this.ordersClient.send(
-      { cmd: 'find_all_orders' },
-      orderPaginationDto,
-    );
+    return this.ordersClient
+      .send({ cmd: 'find_all_orders' }, orderPaginationDto)
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 
   @Get(':id')
@@ -41,5 +46,19 @@ export class OrdersController {
         throw new RpcException(err);
       }),
     );
+  }
+
+  @Patch(':id')
+  changeStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() statusDto: ChangeOrderDto,
+  ) {
+    return this.ordersClient
+      .send({ cmd: 'change_order_status' }, { id, status: statusDto.status })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 }
