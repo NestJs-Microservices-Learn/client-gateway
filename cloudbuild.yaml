@@ -4,7 +4,7 @@ steps:
       [
         'build',
         '-t',
-        'europe-southwest1-docker.pkg.dev/tienda-microservices-430107/tienda-microservices/client-gateway-ms',
+        'europe-southwest1-docker.pkg.dev/tienda-microservices-430107/tienda-microservices/client-gateway',
         '-f',
         'dockerfile.prod',
         '--platform=linux/amd64',
@@ -14,7 +14,7 @@ steps:
     args:
       [
         'push',
-        'europe-southwest1-docker.pkg.dev/tienda-microservices-430107/tienda-microservices/client-gateway-ms',
+        'europe-southwest1-docker.pkg.dev/tienda-microservices-430107/tienda-microservices/client-gateway',
       ]
 
 options:
